@@ -1,89 +1,97 @@
-function inital() {
-    var map = new BMap.Map("container"); // 创建Map实例
-    var point = new BMap.Point(116.404, 39.915); // 创建点坐标
-    map.centerAndZoom(point, 15); // 初始化地图,设置中心点坐标和地图级别。
-    map.enableScrollWheelZoom();
-    map.addControl(new BMap.NavigationControl());
-    map.addControl(new BMap.ScaleControl());
-    map.addControl(new BMap.OverviewMapControl());
-    map.addControl(new BMap.MapTypeControl());
+function addJumpMarker(map, point) {
 
-    function setCenterToMyCity(result) {
-        var cityName = result.name;
-        map.setCenter(cityName);
-    }
-    var myCity = new BMap.LocalCity();
-    myCity.get(setCenterToMyCity);
-    return map;
+	var marker = new BMap.Marker(point);
+	// 创建标注
+	map.addOverlay(marker);
+	// 将标注添加到地图中
+	marker.setAnimation(BMAP_ANIMATION_BOUNCE);
+	//跳动的动画
+	return marker;
 }
 
-function addJumpMarker(map, point) {
-    
-    var marker = new BMap.Marker(point); // 创建标注
-    map.addOverlay(marker); // 将标注添加到地图中
-    marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+function addDefaultLabel(info_string, offset_x, offset_y) {
+	var label = new BMap.Label(info_string, {
+		offset : new BMap.Size(offset_x, offset_y)
+	});
+	label.setStyle({
+		borderColor : "#999",
+	});
+	// 浅灰色边框
+	return label;
+}
+
+function getCurrentPositionOnMap(map) {
+	var geolocation = new BMap.Geolocation();
+	geolocation.getCurrentPosition(function(r) {
+		if(this.getStatus() == BMAP_STATUS_SUCCESS) {
+			var mk = addJumpMarker(map, r.point);
+			//添加跳动标注
+			map.panTo(r.point);
+			// 跳转到当前坐标点
+			var label = addDefaultLabel("您的位置", 20, -10);
+			label.setStyle({
+				display : "none"
+			});
+			mk.setLabel(label);
+			mk.addEventListener("mouseover", function() {
+				label.setStyle({
+					display : "block"
+				});
+			});
+			//鼠标经过时 显示label
+			mk.addEventListener("mouseout", function() {
+				label.setStyle({
+					display : "none"
+				});
+			});
+			//鼠标离开时 隐藏label
+			return r.point;
+
+		} else {
+			return undefined;
+		}
+	})
+}
+
+function inital() {
+	var map = new BMap.Map("container");
+	var point = new BMap.Point(116.404, 39.915);
+	// 创建点坐标
+	map.centerAndZoom(point, 15);
+	// 初始化地图,设置中心点坐标和地图级别。
+	map.enableScrollWheelZoom();
+	map.addControl(new BMap.NavigationControl());
+	map.addControl(new BMap.ScaleControl());
+	map.addControl(new BMap.OverviewMapControl());
+	map.addControl(new BMap.MapTypeControl());
+
+	return map;
+
 }
 
 function search(map, location) {
-    
-    var options = {
-        onSearchComplete: function(results) {
-            // 判断状态是否正确
-            alert(results.getStatus());
-            if (results.getStatus() === BMAP_STATUS_SUCCESS) {
-                var s = [];
-                for (var i = 0; i < results.getCurrentNumPois(); i++) {
-                    s.push(results.getPoi(i).title + ", " + results.getPoi(i).address);
-                }
-                document.getElementById("results").innerHTML = s.join("<br/>");
-            }
-        }
-    };
-    
-    var local = new BMap.LocalSearch(map, options);
-    local.search(location);
-    
-    /*
-    var localsearch = new BMap.LocalSearch(map, {
-        renderOptions: {
-            map: map,
-            autoViewport:true,
-            panel: "results"
-        }
-    });
-    
-    $("#results").html(""); //每次生成前清空文本域  
-    
-    //map.clearOverlays(); //清除地图上所有标记  
-    alert(location);
-    localsearch.search(location); //查找城市 
-    
-    $("#results").html(location + " " + localsearch.getStatus() + " "+ localsearch.getResults());
-    */
-    /*
-    var i = 1;
-    localsearch.setSearchCompleteCallback(function(rs) {
-        if (localsearch.getStatus() == BMAP_STATUS_SUCCESS) {
-            for (j = 0; j < rs.getCurrentNumPois(); j++) {
-                var poi = rs.getPoi(j);
-                map.addOverlay(new BMap.Marker(poi.point)); //如果查询到，则添加红色marker  
-                var result = $("results").html() + poi.title + ":" + poi.point.lng + "," + poi.point.lat + '\n';
-                $("results").html(result)
-            }
-            if (rs.getPageIndex != rs.getNumPages()) {
-                localsearch.gotoPage(i);
-                i = i + 1;
-            }
-        }
-    });
-    */
+
 }
+
+function addressSearch(map, address, city) {
+	var myGeo = new BMap.Geocoder();
+	alert(address + " " + city);
+	// 将地址解析结果显示在地图上,并调整地图视野
+	myGeo.getPoint(address, function(point) {
+		if(point) {
+			map.panTo(point);
+			map.addOverlay(new BMap.Marker(point));
+			alert("find it!");
+		}
+	}, city);
+}
+
 function localSearch(map, position) {
-    var local = new BMap.LocalSearch(map, {
-        renderOptions: {
-            map: map,
-            panel: "results"
-        }
-    });
-    local.search(position);
+	var local = new BMap.LocalSearch(map, {
+		renderOptions : {
+			map : map,
+			panel : "results"
+		}
+	});
+	local.search(position);
 }

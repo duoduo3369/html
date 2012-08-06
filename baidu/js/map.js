@@ -1,50 +1,60 @@
-function addJumpMarker(map, point) {
-
+function addMarker(map, point, jump) {
+	jump = jump || false;
 	var marker = new BMap.Marker(point);
 	// 创建标注
 	map.addOverlay(marker);
 	// 将标注添加到地图中
-	marker.setAnimation(BMAP_ANIMATION_BOUNCE);
-	//跳动的动画
+	if(jump === true) {
+		marker.setAnimation(BMAP_ANIMATION_BOUNCE);
+		//跳动的动画
+	}
 	return marker;
 }
 
-function addDefaultLabel(info_string, offset_x, offset_y) {
+function addDefaultLabel(info_string, offset_x, offset_y, label_display) {
+	offset_x = offset_x || 20;
+	offset_y = offset_y || -10;
+	label_display = label_display || "none"
 	var label = new BMap.Label(info_string, {
 		offset : new BMap.Size(offset_x, offset_y)
 	});
 	label.setStyle({
 		borderColor : "#999",
+		display : label_display,
 	});
 	// 浅灰色边框
 	return label;
+}
+
+function addDefaultEventMarker(map, point, label, jump) {
+	jump = jump || false;
+	var maker = addMarker(map, point, jump);
+	maker.setLabel(label);
+	maker.addEventListener("mouseover", function() {
+		label.setStyle({
+			display : "block"
+		});
+	});
+	//鼠标经过时 显示label
+	maker.addEventListener("mouseout", function() {
+		label.setStyle({
+			display : "none"
+		});
+	});
+	//鼠标离开时 隐藏label
+	return maker;
 }
 
 function getCurrentPositionOnMap(map) {
 	var geolocation = new BMap.Geolocation();
 	geolocation.getCurrentPosition(function(r) {
 		if(this.getStatus() == BMAP_STATUS_SUCCESS) {
-			var mk = addJumpMarker(map, r.point);
+			var label = addDefaultLabel("您的位置", 20, -10, "none");
+			var mk = addDefaultEventMarker(map, r.point, label, jump = true);
 			//添加跳动标注
 			map.panTo(r.point);
 			// 跳转到当前坐标点
-			var label = addDefaultLabel("您的位置", 20, -10);
-			label.setStyle({
-				display : "none"
-			});
-			mk.setLabel(label);
-			mk.addEventListener("mouseover", function() {
-				label.setStyle({
-					display : "block"
-				});
-			});
-			//鼠标经过时 显示label
-			mk.addEventListener("mouseout", function() {
-				label.setStyle({
-					display : "none"
-				});
-			});
-			//鼠标离开时 隐藏label
+
 			return r.point;
 
 		} else {
@@ -81,17 +91,34 @@ function addressSearch(map, address, city) {
 		if(point) {
 			map.panTo(point);
 			map.addOverlay(new BMap.Marker(point));
-			alert("find it!");
+			
 		}
 	}, city);
 }
 
 function localSearch(map, position) {
-	var local = new BMap.LocalSearch(map, {
-		renderOptions : {
-			map : map,
-			panel : "results"
+
+	var options = {
+		onSearchComplete : function(results) {
+			// 判断状态是否正确
+			if(local.getStatus() == BMAP_STATUS_SUCCESS) {
+				var s = [];
+				var label;
+				var info;
+				var maker;
+				map.panTo(results.getPoi(0).point);
+				for(var i = 0; i < results.getCurrentNumPois(); i++) {
+					info = results.getPoi(i).title + ", " + results.getPoi(i).address;
+					s.push(info);
+					label = addDefaultLabel(info);
+					maker = addDefaultEventMarker(map, results.getPoi(i).point, label);
+										
+				}
+
+				document.getElementById("results").innerHTML = s.join("<br/>");
+			}
 		}
-	});
+	};
+	var local = new BMap.LocalSearch(map, options);
 	local.search(position);
 }

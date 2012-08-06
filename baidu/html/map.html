@@ -28,17 +28,17 @@
 				</li>
 			</ul>
 			<div id="location">
-				<form name="search">
-					<input id="word_location" type="text" name="word_location" />
-					<input id="location_search" type="submit" value="search" />
-				</form>
+				<input id="word_location" type="text" name="word_location" />
+				<button id="location_search" value="search">
+					查找
+				</button>
 			</div>
 			<div id="go">
-				<form name="search">
-					<input id="word_from" type="text" name="word_from" />
-					<input id="word_to" type="text" name="word_to" />
-					<input id="go_search" type="submit" value="search" />
-				</form>
+				<input id="word_from" type="text" name="word_from" />
+				<input id="word_to" type="text" name="word_to" />
+				<button id="go_search" value="search">
+					查找
+				</button>
 			</div>
 		</div>
 		<div>
@@ -53,34 +53,22 @@
 		</div>
 		<script type="text/javascript" src="../js/map.js"></script>
 		<script>
-		// /*
+			// /*
 			$(function() {
 				$("button").button();
+				
 				var map = inital();
+				
+				$("#location_search").click(function() {
+					var address = $('#word_location').val();					
+					localSearch(map,address);
+				});
+				
 				$("#inital_button").click(function() {
 					getCurrentPositionOnMap(map);
-					return false;
 				});
 			});
-			// */
-			// /*
-			 $(function() {
-			 //var map = inital(); // 创建Map实例
-			 var city = "北京";
-			 var address = "北京市海淀区上地10街";
-			 addressSearch(map, address, city);
-			 
-			 $('form').submit(function() {
-			 return false;
-			 });
-			 //
-			 $("form input#location_search").click(function(map) {
-			 address = $('#word_location').val() || address;
-			 alert(address);
-			 addressSearch(map, address, city);
-			 });
-			 });
-			// */
+			
 		</script>
 	</body>
 </html>

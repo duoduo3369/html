@@ -9,8 +9,11 @@ body {
 }
 
 #container {
-	height: 100%;
-	width: 95%;
+	width:640px;
+	height:400px;
+	border:1px solid gray;
+	overflow: hidden; 
+	position: relative
 }
 #inital_button {
 	margin-left: 20px;

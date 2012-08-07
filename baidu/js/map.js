@@ -1,4 +1,4 @@
-function addMarker(map, point, jump,index) {
+function addMarker(map, point, jump, index) {
 	jump = jump || false;
 	var myIcon = new BMap.Icon("../images/markers_new.png", new BMap.Size(28, 32), {
 		offset : new BMap.Size(10, 25),
@@ -8,7 +8,7 @@ function addMarker(map, point, jump,index) {
 	var marker = new BMap.Marker(point, {
 		icon : myIcon
 	});
-	
+
 	map.addOverlay(marker);
 	// 将标注添加到地图中
 	if(jump === true) {
@@ -33,9 +33,10 @@ function addDefaultLabel(info_string, offset_x, offset_y, label_display) {
 	return label;
 }
 
-function addDefaultEventMarker(map, point, label, jump,index) {
+function addDefaultEventMarker(map, point, label, jump, index) {
+	clearOverlays();
 	jump = jump || false;
-	var maker = addMarker(map, point, jump,index);
+	var maker = addMarker(map, point, jump, index);
 	maker.setLabel(label);
 	maker.addEventListener("mouseover", function() {
 		label.setStyle({
@@ -57,7 +58,32 @@ function getCurrentPositionOnMap(map) {
 	geolocation.getCurrentPosition(function(r) {
 		if(this.getStatus() == BMAP_STATUS_SUCCESS) {
 			var label = addDefaultLabel("您的位置", 20, -10, "none");
-			var mk = addDefaultEventMarker(map, r.point, label, jump = true);
+
+			//var mk = addDefaultEventMarker(map, r.point, label, jump = true);
+
+			var myIcon = new BMap.Icon("../images/markers_new.png", new BMap.Size(28, 48), {
+				offset : new BMap.Size(10, 25),
+				imageOffset : new BMap.Size(-100, -150)
+			});
+
+			var marker = new BMap.Marker(r.point, {
+				icon : myIcon
+			});
+			marker.setLabel(label);
+			marker.addEventListener("mouseover", function() {
+				label.setStyle({
+					display : "block"
+				});
+			});
+			//鼠标经过时 显示label
+			marker.addEventListener("mouseout", function() {
+				label.setStyle({
+					display : "none"
+				});
+			});
+			marker.setAnimation(BMAP_ANIMATION_BOUNCE);
+			map.addOverlay(marker);
+
 			//添加跳动标注
 			map.panTo(r.point);
 			// 跳转到当前坐标点
@@ -106,26 +132,45 @@ function addressSearch(map, address, city) {
 function localSearch(map, position) {
 
 	var options = {
-		onSearchComplete : function(results) {
-			// 判断状态是否正确
-			if(local.getStatus() == BMAP_STATUS_SUCCESS) {
-				var s = [];
-				var label;
-				var info;
-				//var maker;
-				map.panTo(results.getPoi(0).point);
-				for(var i = 0; i < results.getCurrentNumPois(); i++) {
-					info = results.getPoi(i).title + ", " + results.getPoi(i).address;
-					s.push(info);
-					label = addDefaultLabel(info);
-					addDefaultEventMarker(map, results.getPoi(i).point, label,false,i);
+		/*
+		 onSearchComplete : function(results) {
+		 // 判断状态是否正确
+		 if(local.getStatus() == BMAP_STATUS_SUCCESS) {
+		 var s = [];
+		 var label;
+		 var info;
+		 //var maker;
+		 map.panTo(results.getPoi(0).point);
+		 for(var i = 0; i < results.getCurrentNumPois(); i++) {
+		 info = results.getPoi(i).title + ", " + results.getPoi(i).address;
+		 s.push(info);
+		 label = addDefaultLabel(info);
+		 addDefaultEventMarker(map, results.getPoi(i).point, label, false, i);
 
-				}
+		 }
 
-				document.getElementById("results").innerHTML = s.join("<br/>");
-			}
+		 //	document.getElementById("results").innerHTML = s.join("<br/>");
+		 }
+		 },
+		 */
+		renderOptions : {
+			map : map,
+			panel : "results"
 		}
+
 	};
 	var local = new BMap.LocalSearch(map, options);
 	local.search(position);
+}
+
+function transitSearch(map, from, to) {
+		
+	var transit = new BMap.TransitRoute(map, {
+		renderOptions : {
+			map : map,
+			panel : "transit_results"
+		}
+	});
+	transit.search(from, to);
+
 }

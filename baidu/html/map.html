@@ -21,10 +21,13 @@
 		<div id="search_tabs">
 			<ul>
 				<li>
-					<a href="#location">location</a>
+					<a href="#location">搜索</a>
 				</li>
 				<li>
-					<a href="#go">go</a>
+					<a href="#transit">公交</a>
+				</li>
+				<li>
+					<a href="#drive">驾车</a>
 				</li>
 			</ul>
 			<div id="location">
@@ -33,10 +36,17 @@
 					查找
 				</button>
 			</div>
-			<div id="go">
-				<input id="word_from" type="text" name="word_from" />
-				<input id="word_to" type="text" name="word_to" />
-				<button id="go_search" value="search">
+			<div id="transit">
+				<input id="transit_from" type="text" name="word_from" />
+				<input id="transit_to" type="text" name="word_to" />
+				<button id="transit_search" value="search">
+					查找
+				</button>
+			</div>
+			<div id="drive">
+				<input id="drive_from" type="text" name="word_from" />
+				<input id="drive_to" type="text" name="word_to" />
+				<button id="drive_search" value="search">
 					查找
 				</button>
 			</div>
@@ -47,10 +57,9 @@
 				您的位置
 			</button>
 		</div>
-		<div style="width:520px;height:340px;border:1px solid gray" id="container"></div>
-		<div id="results" style="font-size:13px;margin-top:10px;">
-			result
-		</div>
+		<div  id="container"></div>
+		<div id="results" style="font-size:13px;margin-top:10px;"></div>
+		<div id="transit_results" style="font-size:13px;margin-top:10px;"></div>
 		<script type="text/javascript" src="../js/map.js"></script>
 		<script>
 			// /*
@@ -62,6 +71,13 @@
 				$("#location_search").click(function() {
 					var address = $('#word_location').val();					
 					localSearch(map,address);
+					
+				});
+				$("#transit_search").click(function() {
+					var from = $('#transit_from').val();
+					var to = $('#transit_to').val();
+								
+					transitSearch(map, from, to);
 					
 				});
 				

@@ -1,7 +1,14 @@
-function addMarker(map, point, jump) {
+function addMarker(map, point, jump,index) {
 	jump = jump || false;
-	var marker = new BMap.Marker(point);
-	// 创建标注
+	var myIcon = new BMap.Icon("../images/markers_new.png", new BMap.Size(28, 32), {
+		offset : new BMap.Size(10, 25),
+		imageOffset : new BMap.Size(0 - index * 29, 0)
+	});
+
+	var marker = new BMap.Marker(point, {
+		icon : myIcon
+	});
+	
 	map.addOverlay(marker);
 	// 将标注添加到地图中
 	if(jump === true) {
@@ -26,9 +33,9 @@ function addDefaultLabel(info_string, offset_x, offset_y, label_display) {
 	return label;
 }
 
-function addDefaultEventMarker(map, point, label, jump) {
+function addDefaultEventMarker(map, point, label, jump,index) {
 	jump = jump || false;
-	var maker = addMarker(map, point, jump);
+	var maker = addMarker(map, point, jump,index);
 	maker.setLabel(label);
 	maker.addEventListener("mouseover", function() {
 		label.setStyle({
@@ -91,7 +98,7 @@ function addressSearch(map, address, city) {
 		if(point) {
 			map.panTo(point);
 			map.addOverlay(new BMap.Marker(point));
-			
+
 		}
 	}, city);
 }
@@ -105,14 +112,14 @@ function localSearch(map, position) {
 				var s = [];
 				var label;
 				var info;
-				var maker;
+				//var maker;
 				map.panTo(results.getPoi(0).point);
 				for(var i = 0; i < results.getCurrentNumPois(); i++) {
 					info = results.getPoi(i).title + ", " + results.getPoi(i).address;
 					s.push(info);
 					label = addDefaultLabel(info);
-					maker = addDefaultEventMarker(map, results.getPoi(i).point, label);
-										
+					addDefaultEventMarker(map, results.getPoi(i).point, label,false,i);
+
 				}
 
 				document.getElementById("results").innerHTML = s.join("<br/>");

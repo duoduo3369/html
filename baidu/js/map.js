@@ -53,32 +53,6 @@ function localSearch(place, panel) {
 			map : map,
 			panel : panel,
 		},
-
-		/*
-		 onSearchComplete : function(results) {
-		 // 判断状态是否正确
-		 if(local.getStatus() == BMAP_STATUS_SUCCESS) {
-
-		 var s = [];
-		 var position_object;
-		 var marker;
-
-		 for(var i = 0; i < results.getCurrentNumPois(); i++) {
-		 position_object = results.getPoi(i)
-		 s.push("<div><p><a onmouseover='map.openInfoWindow(localInfowin,startResults.getPoi(" + i + ").point);' href='#'>");
-		 s.push(position_object.title);
-		 s.push("</a></p><p>");
-		 s.push(position_object.address);
-		 s.push("</p></div>");
-
-		 }
-		 $("#local_search_results").html(s.join(""));
-
-		 }
-
-		 }
-
-		 */
 	}
 	map.clearOverlays();
 	var local = new BMap.LocalSearch(map, options);
@@ -98,11 +72,17 @@ var endResults = null;
 var startPoint = null;
 var endPoint = null;
 
-function transStartSearch(place) {
+function transStartSearch(place, trans_type) {
 	var startOption = {
 		onSearchComplete : function(results) {
 			// 判断状态是否正确
-
+			if(trans_type == "公交") {
+				deterFunction = "busStartDeter";
+			} else if(trans_type == "驾车") {
+				deterFunction = "drivingStartDeter";
+			}
+			startPoint = null;
+			startInfowindowArray = new Array();
 			if(startSearch.getStatus() == BMAP_STATUS_SUCCESS) {
 				startResults = results;
 				var s = [];
@@ -115,12 +95,12 @@ function transStartSearch(place) {
 					if(position_object.phoneNumber != undefined) {
 						info_string += "<span>电话：</span>" + position_object.phoneNumber + "<br />";
 					}
-					info_string += "<input value='选为起点' type='button' onclick=startDeter(" + i + "); /></p>";
+					info_string += "<input value='选为起点' type='button' onclick=" + deterFunction + "(" + i + "); /></p>";
 					info_window = new BMap.InfoWindow(info_string);
 
 					startInfowindowArray.push(info_window);
 
-					s.push("<div><p><a onmouseover='map.openInfoWindow(startInfowindowArray[" + i + "],startResults.getPoi(" + i + ").point);' href='#'>");
+					s.push("<div><p><a onclick='map.openInfoWindow(startInfowindowArray[" + i + "],startResults.getPoi(" + i + ").point);' href='#'>");
 					s.push(position_object.title);
 					s.push("</a></p><p>");
 					s.push(position_object.address);
@@ -136,7 +116,7 @@ function transStartSearch(place) {
 				$("#transit_from_results").html(s.join(""));
 				map.panTo(results.getPoi(0).point);
 				map.setZoom(14);
-				alert('true')
+
 			} else {
 				alert('没有找到相应的搜索结果')
 				startResults = null;
@@ -153,13 +133,20 @@ function transStartSearch(place) {
 	})
 	startSearch.disableFirstResultSelection()
 }
-function transEndSearch(place) {
+
+function transEndSearch(place, trans_type) {
 	var endOption = {
 		onSearchComplete : function(results) {
 			// 判断状态是否正确
-
+			if(trans_type == "公交") {
+				deterFunction = "busEndDeter";
+			} else if(trans_type == "驾车") {
+				deterFunction = "drivingEndDeter";
+			}
+			endPoint = null;
+			endInfowindowArray = new Array();
 			if(endSearch.getStatus() == BMAP_STATUS_SUCCESS) {
-				
+
 				endResults = results;
 				var s = [];
 				var position_object, marker, label, info_string, info_window;
@@ -171,12 +158,12 @@ function transEndSearch(place) {
 					if(position_object.phoneNumber != undefined) {
 						info_string += "<span>电话：</span>" + position_object.phoneNumber + "<br />";
 					}
-					info_string += "<input value='选为终点' type='button' onclick=endDeter(" + i + "); /></p>";
+					info_string += "<input value='选为终点' type='button' onclick=" + deterFunction + "(" + i + "); /></p>";
 					info_window = new BMap.InfoWindow(info_string);
 
 					endInfowindowArray.push(info_window);
 
-					s.push("<div><p><a onmouseover='map.openInfoWindow(endInfowindowArray[" + i + "],endResults.getPoi(" + i + ").point);' href='#'>");
+					s.push("<div><p><a onclick='map.openInfoWindow(endInfowindowArray[" + i + "],endResults.getPoi(" + i + ").point);' href='#'>");
 					s.push(position_object.title);
 					s.push("</a></p><p>");
 					s.push(position_object.address);
@@ -192,7 +179,7 @@ function transEndSearch(place) {
 				$("#transit_to_results").html(s.join(""));
 				map.panTo(results.getPoi(0).point);
 				map.setZoom(14);
-				alert('true')
+
 			} else {
 				alert('没有找到相应的搜索结果')
 				endResults = null;
@@ -209,7 +196,8 @@ function transEndSearch(place) {
 	})
 	endSearch.disableFirstResultSelection()
 }
-function startDeter(index) {
+
+function busStartDeter(index) {
 	//map.clearOverlays();
 	startInfowin = startInfowindowArray[index];
 	startPoint = startInfowin.getPosition();
@@ -217,14 +205,13 @@ function startDeter(index) {
 	var marker = new BMap.Marker(startPoint);
 	marker.setAnimation()
 	map.addOverlay(marker);
-	alert(startPoint + trans_type)
 	if(startPoint != null && endPoint != null) {
 		busSearch(startPoint, endPoint);
 
 	}
 }
 
-function endDeter(index) {
+function busEndDeter(index) {
 	//map.clearOverlays();
 
 	endInfowin = endInfowindowArray[index];
@@ -241,6 +228,37 @@ function endDeter(index) {
 	}
 }
 
+function drivingStartDeter(index) {
+	//map.clearOverlays();
+	startInfowin = startInfowindowArray[index];
+	startPoint = startInfowin.getPosition();
+
+	var marker = new BMap.Marker(startPoint);
+	marker.setAnimation()
+	map.addOverlay(marker);
+	if(startPoint != null && endPoint != null) {
+		drivingSearch(startPoint, endPoint);
+
+	}
+}
+
+function drivingEndDeter(index) {
+	//map.clearOverlays();
+
+	endInfowin = endInfowindowArray[index];
+
+	endPoint = endInfowin.getPosition();
+
+	var marker = new BMap.Marker(endPoint);
+	marker.setAnimation()
+
+	map.addOverlay(marker);
+	if(startPoint != null && endPoint != null) {
+		drivingSearch(startPoint, endPoint);
+
+	}
+}
+
 function busSearch(from, to) {
 	var transit = new BMap.TransitRoute(map, {
 		renderOptions : {
@@ -249,6 +267,7 @@ function busSearch(from, to) {
 			panel : "transit_results"
 		}
 	});
+	map.clearOverlays();
 	transit.search(from, to);
 }
 
@@ -260,6 +279,7 @@ function drivingSearch(from, to) {
 			panel : "transit_results"
 		}
 	});
+	map.clearOverlays();
 	driving.search(from, to);
 }
 

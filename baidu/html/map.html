@@ -101,14 +101,14 @@
 				$("#transit_search_button").click(function() {
 					var from = $("#transit_search_input_from").val();
 					var to = $("#transit_search_input_to").val();
-					transStartSearch(from);
-					transEndSearch(to);
+					transStartSearch(from,"公交")
+					transEndSearch(to,"公交")
 				});
 				$("#drive_search_button").click(function() {
 					var from = $("#drive_search_input_from").val();
 					var to = $("#drive_search_input_to").val();
-					transStartSearch(from,"驾车");
-					transEndSearch(to,"驾车");
+					transStartSearch(from,"驾车")
+					transEndSearch(to,"驾车")
 				});
 				
 				

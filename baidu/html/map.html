@@ -21,71 +21,84 @@
 		<div id="search_tabs">
 			<ul>
 				<li>
-					<a href="#location">搜索</a>
+					<a href="#location_search">搜索</a>
 				</li>
 				<li>
-					<a href="#transit">公交</a>
+					<a href="#transit_search">公交</a>
 				</li>
 				<li>
-					<a href="#drive">驾车</a>
+					<a href="#drive_search">驾车</a>
 				</li>
 			</ul>
-			<div id="location">
-				<input id="word_location" type="text" name="word_location" />
-				<button id="location_search" value="search">
+			<div id="location_search">
+				<input id="location_search_input" type="text" name="word_location" />
+				<button id="location_search_button" value="search" >
 					查找
 				</button>
-			</div>
-			<div id="transit">
-				<input id="transit_from" type="text" name="word_from" />
-				<input id="transit_to" type="text" name="word_to" />
-				<button id="transit_search" value="search">
-					查找
+				<button id="inital_button">
+					您的位置
 				</button>
 			</div>
-			<div id="drive">
-				<input id="drive_from" type="text" name="word_from" />
-				<input id="drive_to" type="text" name="word_to" />
-				<button id="drive_search" value="search">
+			<div id="transit_search">
+				<input id="transit_search_input_from" type="text" name="word_from" />
+				<input id="transit_search_input_to" type="text" name="word_to" />
+				<button id="transit_search_button" value="search">
 					查找
+				</button>
+				<button id="inital_button">
+					您的位置
+				</button>
+			</div>
+			<div id="drive_search">
+				<input id="drive_search_input_from" type="text" name="word_from" />
+				<input id="drive_search_input_to" type="text" name="word_to" />
+				<button id="drive_search_button" value="search">
+					查找
+				</button>
+				<button id="inital_button">
+					您的位置
 				</button>
 			</div>
 		</div>
 		<div>
 
-			<button id="inital_button">
-				您的位置
-			</button>
 		</div>
-		<div  id="container"></div>
-		<div id="results" style="font-size:13px;margin-top:10px;"></div>
-		<div id="transit_results" style="font-size:13px;margin-top:10px;"></div>
+
+		<div class="mainbox">
+			<div id="container"></div>
+			<div id="box">
+				<div id="local_search_results_box">
+					<div id="local_search_results_title">
+						标题：
+					</div>
+					<div id="local_search_results_detail" style="font-size:13px;margin-top:10px;">
+					</div>
+				</div>
+				<div id="transit_from_results" style="font-size:13px;margin-top:10px;">
+					transit_from_results
+				</div>
+				<div id="transit_to_results" style="font-size:13px;margin-top:10px;">
+					transit_to_results
+				</div>
+				<div id="transit_results" style="font-size:13px;margin-top:10px;">
+					transit_results
+				</div>
+			</div>
+
+		</div>
+
 		<script type="text/javascript" src="../js/map.js"></script>
 		<script>
-			// /*
-			$(function() {
-				$("button").button();
-				
-				var map = inital();
-				
-				$("#location_search").click(function() {
-					var address = $('#word_location').val();					
-					localSearch(map,address);
-					
+			$(document).ready(function() {
+				$("#location_search_button").click(function() {
+					var place = $("#location_search_input").val()
+					localSearch(place, "local_search_results");
 				});
-				$("#transit_search").click(function() {
-					var from = $('#transit_from').val();
-					var to = $('#transit_to').val();
-								
-					transitSearch(map, from, to);
-					
-				});
-				
+
 				$("#inital_button").click(function() {
-					getCurrentPositionOnMap(map);
+					getCurrentPosition()
 				});
 			});
-			
 		</script>
 	</body>
 </html>

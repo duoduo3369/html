@@ -69,7 +69,7 @@
 			<div id="box">
 				<div id="local_search_results_box">
 					<div id="local_search_results_title">
-						标题：
+						起点：
 					</div>
 					<div id="local_search_results_detail" style="font-size:13px;margin-top:10px;">
 					</div>
@@ -92,12 +92,19 @@
 			$(document).ready(function() {
 				$("#location_search_button").click(function() {
 					var place = $("#location_search_input").val()
-					localSearch(place, "local_search_results");
+					localSearch(place, "local_search_results_detail");
 				});
 
 				$("#inital_button").click(function() {
 					getCurrentPosition()
 				});
+				$("#transit_search_button").click(function() {
+					var from = $("#transit_search_input_from").val();
+					
+					transStartSearch(from,"transit_from_results");
+				});
+				
+				
 			});
 		</script>
 	</body>

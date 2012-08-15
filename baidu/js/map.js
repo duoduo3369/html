@@ -88,10 +88,76 @@ function localSearch(place, panel) {
 		map.setZoom(14);
 
 	})
+	local.disableFirstResultSelection()
 }
 
-function transSearch(from,to){
-		
+var startInfowin = new Array();
+var endInfowin = new Array();
+var startResults = null;
+var endResults = null;
+
+function transStartSearch(place, panel, direction) {
+	direction = direction || "起点";
+	var options = {
+
+		onSearchComplete : function(results) {
+			// 判断状态是否正确
+			if(local.getStatus() == BMAP_STATUS_SUCCESS) {
+				if(direction == "起点") {
+					startResults = results;
+					startInfowin = new Array();
+					infoWindowArray = startInfowin;
+				} else {
+					endResults = results;
+					endInfowin = new Array();
+					infoWindowArray = endInfowin;
+				}
+				var s = [];
+				var position_object;
+				var marker;
+				var label;
+				var info_string;
+				var info_window;
+				for(var i = 0; i < results.getCurrentNumPois(); i++) {
+					position_object = results.getPoi(i)
+					info_string = "<p class='transInfoWindow'>" + position_object.title + "<br /><span>地址：</span>" + position_object.address + "<br />";
+					if(position_object.phoneNumber != undefined) {
+						info_string += "<span>电话：</span>" + position_object.phoneNumber + "<br />";
+					}
+					info_string += "<input value='选为" + direction + "' type='button' onclick='startDeter();' /></p>";
+					info_window = new BMap.InfoWindow(info_string);
+					
+					infoWindowArray.push(info_window);
+
+					s.push("<div><p><a onmouseover='map.openInfoWindow(startInfowin[" + i + "],startResults.getPoi(" + i + ").point);' href='#'>");
+					s.push(position_object.title);
+					s.push("</a></p><p>");
+					s.push(position_object.address);
+					s.push("</p></div>");
+					marker = addMarker(position_object.point, i);
+					marker.addEventListener("click", function() {
+						map.openInfoWindow(info_window, this.getPosition());
+						map.panTo(this.getPosition());
+						// 跳转到当前坐标点
+						map.setZoom(14)
+					});
+				}
+				$("#transit_from_results").html(s.join(""));
+				map.panTo(results.getPoi(0).point);
+				map.setZoom(14);
+			}
+
+		}
+	}
+	map.clearOverlays();
+	var local = new BMap.LocalSearch(map, options);
+	local.search(place);
+	local.enableAutoViewport();
+	local.setMarkersSetCallback(function() {
+		map.setZoom(14);
+
+	})
+	local.disableFirstResultSelection()
 }
 
 function getCurrentPosition() {
@@ -101,7 +167,6 @@ function getCurrentPosition() {
 		if(this.getStatus() == BMAP_STATUS_SUCCESS) {
 
 			var label = addDefaultLabel("您的位置", 20, -10, "none");
-
 
 			var myIcon = new BMap.Icon("../images/markers_new.png", new BMap.Size(28, 48), {
 				offset : new BMap.Size(10, 25),

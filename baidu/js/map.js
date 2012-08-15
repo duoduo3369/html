@@ -91,52 +91,43 @@ function localSearch(place, panel) {
 	local.disableFirstResultSelection()
 }
 
-var startInfowin = new Array();
-var endInfowin = new Array();
+var startInfowindowArray = new Array();
+var endInfowindowArray = new Array();
 var startResults = null;
 var endResults = null;
+var startPoint = null;
+var endPoint = null;
 
-function transStartSearch(place, panel, direction) {
-	direction = direction || "起点";
-	var options = {
-
+function transStartSearch(place) {
+	var startOption = {
 		onSearchComplete : function(results) {
 			// 判断状态是否正确
-			if(local.getStatus() == BMAP_STATUS_SUCCESS) {
-				if(direction == "起点") {
-					startResults = results;
-					startInfowin = new Array();
-					infoWindowArray = startInfowin;
-				} else {
-					endResults = results;
-					endInfowin = new Array();
-					infoWindowArray = endInfowin;
-				}
+
+			if(startSearch.getStatus() == BMAP_STATUS_SUCCESS) {
+				startResults = results;
 				var s = [];
-				var position_object;
-				var marker;
-				var label;
-				var info_string;
-				var info_window;
+				var position_object, marker, label, info_string, info_window;
+
 				for(var i = 0; i < results.getCurrentNumPois(); i++) {
 					position_object = results.getPoi(i)
+
 					info_string = "<p class='transInfoWindow'>" + position_object.title + "<br /><span>地址：</span>" + position_object.address + "<br />";
 					if(position_object.phoneNumber != undefined) {
 						info_string += "<span>电话：</span>" + position_object.phoneNumber + "<br />";
 					}
-					info_string += "<input value='选为" + direction + "' type='button' onclick='startDeter();' /></p>";
+					info_string += "<input value='选为起点' type='button' onclick=startDeter(" + i + "); /></p>";
 					info_window = new BMap.InfoWindow(info_string);
-					
-					infoWindowArray.push(info_window);
 
-					s.push("<div><p><a onmouseover='map.openInfoWindow(startInfowin[" + i + "],startResults.getPoi(" + i + ").point);' href='#'>");
+					startInfowindowArray.push(info_window);
+
+					s.push("<div><p><a onmouseover='map.openInfoWindow(startInfowindowArray[" + i + "],startResults.getPoi(" + i + ").point);' href='#'>");
 					s.push(position_object.title);
 					s.push("</a></p><p>");
 					s.push(position_object.address);
 					s.push("</p></div>");
 					marker = addMarker(position_object.point, i);
 					marker.addEventListener("click", function() {
-						map.openInfoWindow(info_window, this.getPosition());
+						map.openInfoWindow(startInfowindowArray[i], this.getPosition());
 						map.panTo(this.getPosition());
 						// 跳转到当前坐标点
 						map.setZoom(14)
@@ -145,19 +136,131 @@ function transStartSearch(place, panel, direction) {
 				$("#transit_from_results").html(s.join(""));
 				map.panTo(results.getPoi(0).point);
 				map.setZoom(14);
+				alert('true')
+			} else {
+				alert('没有找到相应的搜索结果')
+				startResults = null;
 			}
-
 		}
-	}
+	};
 	map.clearOverlays();
-	var local = new BMap.LocalSearch(map, options);
-	local.search(place);
-	local.enableAutoViewport();
-	local.setMarkersSetCallback(function() {
+	var startSearch = new BMap.LocalSearch(map, startOption);
+	startSearch.search(place);
+	startSearch.enableAutoViewport();
+	startSearch.setMarkersSetCallback(function() {
 		map.setZoom(14);
 
 	})
-	local.disableFirstResultSelection()
+	startSearch.disableFirstResultSelection()
+}
+function transEndSearch(place) {
+	var endOption = {
+		onSearchComplete : function(results) {
+			// 判断状态是否正确
+
+			if(endSearch.getStatus() == BMAP_STATUS_SUCCESS) {
+				
+				endResults = results;
+				var s = [];
+				var position_object, marker, label, info_string, info_window;
+
+				for(var i = 0; i < results.getCurrentNumPois(); i++) {
+					position_object = results.getPoi(i)
+
+					info_string = "<p class='transInfoWindow'>" + position_object.title + "<br /><span>地址：</span>" + position_object.address + "<br />";
+					if(position_object.phoneNumber != undefined) {
+						info_string += "<span>电话：</span>" + position_object.phoneNumber + "<br />";
+					}
+					info_string += "<input value='选为终点' type='button' onclick=endDeter(" + i + "); /></p>";
+					info_window = new BMap.InfoWindow(info_string);
+
+					endInfowindowArray.push(info_window);
+
+					s.push("<div><p><a onmouseover='map.openInfoWindow(endInfowindowArray[" + i + "],endResults.getPoi(" + i + ").point);' href='#'>");
+					s.push(position_object.title);
+					s.push("</a></p><p>");
+					s.push(position_object.address);
+					s.push("</p></div>");
+					marker = addMarker(position_object.point, i);
+					marker.addEventListener("click", function() {
+						map.openInfoWindow(endInfowindowArray[i], this.getPosition());
+						map.panTo(this.getPosition());
+						// 跳转到当前坐标点
+						map.setZoom(14)
+					});
+				}
+				$("#transit_to_results").html(s.join(""));
+				map.panTo(results.getPoi(0).point);
+				map.setZoom(14);
+				alert('true')
+			} else {
+				alert('没有找到相应的搜索结果')
+				endResults = null;
+			}
+		}
+	};
+	map.clearOverlays();
+	var endSearch = new BMap.LocalSearch(map, endOption);
+	endSearch.search(place);
+	endSearch.enableAutoViewport();
+	endSearch.setMarkersSetCallback(function() {
+		map.setZoom(14);
+
+	})
+	endSearch.disableFirstResultSelection()
+}
+function startDeter(index) {
+	//map.clearOverlays();
+	startInfowin = startInfowindowArray[index];
+	startPoint = startInfowin.getPosition();
+
+	var marker = new BMap.Marker(startPoint);
+	marker.setAnimation()
+	map.addOverlay(marker);
+	alert(startPoint + trans_type)
+	if(startPoint != null && endPoint != null) {
+		busSearch(startPoint, endPoint);
+
+	}
+}
+
+function endDeter(index) {
+	//map.clearOverlays();
+
+	endInfowin = endInfowindowArray[index];
+
+	endPoint = endInfowin.getPosition();
+
+	var marker = new BMap.Marker(endPoint);
+	marker.setAnimation()
+
+	map.addOverlay(marker);
+	if(startPoint != null && endPoint != null) {
+		busSearch(startPoint, endPoint);
+
+	}
+}
+
+function busSearch(from, to) {
+	var transit = new BMap.TransitRoute(map, {
+		renderOptions : {
+			map : map,
+			autoViewport : true,
+			panel : "transit_results"
+		}
+	});
+	transit.search(from, to);
+}
+
+function drivingSearch(from, to) {
+	var driving = new BMap.DrivingRoute(map, {
+		renderOptions : {
+			map : map,
+			autoViewport : true,
+			panel : "transit_results"
+		}
+	});
+	driving.search(from, to);
 }
 
 function getCurrentPosition() {

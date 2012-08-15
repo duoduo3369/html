@@ -100,8 +100,15 @@
 				});
 				$("#transit_search_button").click(function() {
 					var from = $("#transit_search_input_from").val();
-					
-					transStartSearch(from,"transit_from_results");
+					var to = $("#transit_search_input_to").val();
+					transStartSearch(from);
+					transEndSearch(to);
+				});
+				$("#drive_search_button").click(function() {
+					var from = $("#drive_search_input_from").val();
+					var to = $("#drive_search_input_to").val();
+					transStartSearch(from,"驾车");
+					transEndSearch(to,"驾车");
 				});
 				
 				

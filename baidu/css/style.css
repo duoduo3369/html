@@ -9,14 +9,22 @@ body {
 }
 
 #container {
-	width:640px;
-	height:400px;
-	border:1px solid gray;
-	overflow: hidden; 
-	position: relative
+	width: 640px;
+	height: 400px;
+	border: 1px solid gray;
+	overflow: hidden;
+	position: relative;
+	left:0;
+	top:0;
+	margin-right : 10px;
+	float:left;
 }
-#inital_button {
-	margin-left: 20px;
-	margin-top: 10px;
-	margin-bottom: 10px;
+
+#box{
+	position: relative;
+	width: 310px;
+	top:0;
+	right:0;
+	margin-left : 10px;
+	float: left;
 }
